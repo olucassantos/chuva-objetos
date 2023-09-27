@@ -19,8 +19,12 @@ def animacao_jogador():
         surface_jogador = jogador_parado_surfaces
         quantidade_imagens = 12
     elif movimento_jogador != 0: # Jogador está se movendo
-        surface_jogador = jogador_voando_surfaces
-        quantidade_imagens = 7
+        if movimento_jogador == 10 or movimento_jogador == -10: # Avanço
+            surface_jogador = jogador_correndo_surfaces
+            quantidade_imagens = 6
+        else: # Voo
+            surface_jogador = jogador_voando_surfaces
+            quantidade_imagens = 7
 
     # Desenha e atualiza a imagem do jogador
     if jogador_index >= quantidade_imagens:
@@ -54,7 +58,7 @@ def animacao_objetos_chuva():
         if objeto['objeto'].top > 540:
             objetos_caindo.remove(objeto)
 
-def adiciona_novo_objeto():
+def adiciona_novo_objeto_chuva():
     global objetos_caindo, coracao_surfaces, moeda_surfaces, projetil_surfaces
 
     objetos = ['Heart'] * 10 + ['Coin'] * 10 + ['Bullet'] * 80
@@ -121,6 +125,11 @@ jogador_voando_surfaces = []
 for imagem in range(1, 9):
     img = pygame.image.load(f'assets/jogador/voar/Hero Boy Fly{imagem}.png').convert_alpha()
     jogador_voando_surfaces.append(img)
+
+jogador_correndo_surfaces = []
+for imagem in range(1, 8):
+    img = pygame.image.load(f'assets/jogador/avanco/Hero-Boy-Boost-Forward{imagem}.png').convert_alpha()
+    jogador_correndo_surfaces.append(img)
 
 coracao_surfaces = []
 coracao_index = 0
@@ -194,6 +203,12 @@ while True:
                 movimento_jogador = -5
                 direcao_jogador = -1
 
+            if evento.key == pygame.K_SPACE:
+                if direcao_jogador == 1:
+                    movimento_jogador = 10
+                else:
+                    movimento_jogador = -10
+
         # Verifica se o jogador soltou alguma tecla
         if evento.type == pygame.KEYUP:
                 
@@ -205,8 +220,11 @@ while True:
                 if evento.key == pygame.K_LEFT:
                     movimento_jogador = 0
 
+                if evento.key == pygame.K_SPACE:
+                    movimento_jogador = 0
+
         if evento.type == objetos_caindo_timer:
-            adiciona_novo_objeto()
+            adiciona_novo_objeto_chuva()
 
         if evento.type == animacao_coracoes_timer:
             coracao_index += 1
