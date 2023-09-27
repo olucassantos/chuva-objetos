@@ -79,6 +79,41 @@ def adiciona_novo_objeto_chuva():
         'velocidade': random.randint(5, 10)
     })
 
+def colisoes_jogador():
+    global objetos_caindo, moedas, vidas
+
+    for objeto in objetos_caindo:
+        if jogador_parado_retangle.colliderect(objeto['objeto']):
+            if objeto['tipo'] == 'Heart':
+                objetos_caindo.remove(objeto)
+                vidas += 1
+            elif objeto['tipo'] == 'Coin':
+                objetos_caindo.remove(objeto)
+                moedas += 1
+            elif objeto['tipo'] == 'Bullet':
+                objetos_caindo.remove(objeto)
+                vidas -= 1
+
+def mostra_textos():
+    global moedas, vidas
+    # Cria o texto para as moedas
+    texto_moedas = fonte_pixel.render(str(moedas), True, (255, 255, 255))
+    texto_moedas_rect = texto_moedas.get_rect(center=(850, 50))
+    moeda_decoracao_surf = pygame.transform.scale(moeda_surfaces[0], (40, 40))
+    moeda_decoracao = moeda_decoracao_surf.get_rect(center=(900, 50))
+
+    # Cria o texto para as vidas
+    texto_vidas = fonte_pixel.render(str(vidas), True, (255, 255, 255))
+    texto_vidas_rect = texto_vidas.get_rect(center=(850, 100))
+    coracao_decoracao_surf = pygame.transform.scale(coracao_surfaces[0], (40, 40))
+    coracao_decoracao = coracao_decoracao_surf.get_rect(center=(900, 100))
+
+    # Desenha os textos na tela
+    tela.blit(texto_moedas, texto_moedas_rect)
+    tela.blit(texto_vidas, texto_vidas_rect)
+    tela.blit(moeda_decoracao_surf, moeda_decoracao)
+    tela.blit(coracao_decoracao_surf, coracao_decoracao)
+
 # Inicializa o pygame
 pygame.init()
 
@@ -165,6 +200,10 @@ direcao_jogador = 0
 
 # Cria uma lista de objetos que caem do céu
 objetos_caindo = []
+
+# Dados do Jogador
+moedas = 0
+vidas = 5
 
 # Cria um novo evento para adicionar objetos na lista
 objetos_caindo_timer = pygame.USEREVENT + 1
@@ -255,6 +294,8 @@ while True:
     # Anima o personagem 
     animacao_jogador()
     animacao_objetos_chuva()
+    colisoes_jogador()
+    mostra_textos()
 
     # Atualiza a tela
     pygame.display.update()
