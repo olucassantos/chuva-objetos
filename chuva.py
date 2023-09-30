@@ -1,6 +1,31 @@
 import pygame
 from sys import exit
 
+def animacao_personagem():
+    global jogador_index
+    # Calcula o movimento do personagem
+    jogador_retangulo.x += movimento_personagem
+    # jogador_surface = null
+
+    if movimento_personagem == 0: # Jogador está parado
+        jogador_superficies = jogador_parado_superficies
+    else: # Jogador está se movimentando
+        jogador_superficies = jogador_voando_superficies
+
+    # Avança para o proximo frame
+    jogador_index += 0.11
+    if jogador_index > len(jogador_superficies) - 1:
+        jogador_index = 0
+
+    if direcao_personagem == 1:
+        jogador = pygame.transform.flip(jogador_superficies[int(jogador_index)], True, False)
+    else:
+        jogador = jogador_superficies[int(jogador_index)]
+
+    # Desenha o jogador na tela
+    tela.blit(jogador, jogador_retangulo)
+
+
 # Inicializa o pygame
 pygame.init()
 
@@ -57,6 +82,7 @@ relogio = pygame.time.Clock()
 
 # Controla se o personagem está andando (negativo esquerda, positivo direita)
 movimento_personagem = 0
+direcao_personagem = 0
 
 # Loop principal do jogo
 while True:
@@ -68,9 +94,11 @@ while True:
         if evento.type == pygame.KEYDOWN:
             if evento.key == pygame.K_RIGHT:
                 movimento_personagem = 5
+                direcao_personagem = 1
 
             if evento.key == pygame.K_LEFT:
                 movimento_personagem = -5
+                direcao_personagem = 0
 
         if evento.type == pygame.KEYUP:
             if evento.key == pygame.K_RIGHT:
@@ -89,22 +117,8 @@ while True:
     tela.blit(fundo_lua, (0, 0))
     tela.blit(fundo_rochas_voadoras, (0, 0))
     
-    # Calcula o movimento do personagem
-    jogador_retangulo.x += movimento_personagem
-    # jogador_surface = null
-
-    if movimento_personagem == 0: # Jogador está parado
-        jogador_superficies = jogador_parado_superficies
-    else: # Jogador está se movimentando
-        jogador_superficies = jogador_voando_superficies
-
-    # Desenha o jogador na tela
-    tela.blit(jogador_superficies[int(jogador_index)], jogador_retangulo)
-
-    jogador_index += 0.11
-
-    if jogador_index > len(jogador_superficies) - 1:
-        jogador_index = 0
+    # Faz a chamada da função animação do personagem
+    animacao_personagem()
 
     # Atualiza a tela com o conteudo
     pygame.display.update()
