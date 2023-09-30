@@ -1,5 +1,32 @@
 import pygame
 from sys import exit
+from random import randint
+
+def animacao_rochas():
+    global movimento_rochas
+
+    if fundo_rochas_voadoras_rect.y <= -20:
+        movimento_rochas = 1
+    elif fundo_rochas_voadoras_rect.y >= 20:
+        movimento_rochas = -1
+    
+    fundo_rochas_voadoras_rect.y += movimento_rochas
+
+    tela.blit(fundo_rochas_voadoras, fundo_rochas_voadoras_rect)
+
+def animacao_estrelas():
+    global index_estrelas
+    index_estrelas += 0.22
+
+    if (index_estrelas >= 4):
+        index_estrelas = 0
+    
+    if (int(index_estrelas) == 0):
+        tela.blit(fundo_estrelas, (0, 0))
+    elif (int(index_estrelas) == 1):
+        tela.blit(fundo_estrelas_2, (0, 0))
+    else:
+        tela.blit(fundo_estrelas_3, (0, 0))
 
 def animacao_personagem():
     global jogador_index
@@ -25,6 +52,8 @@ def animacao_personagem():
     # Desenha o jogador na tela
     tela.blit(jogador, jogador_retangulo)
 
+def adicionar_objeto():
+    print("Criar novo objeto")
 
 # Inicializa o pygame
 pygame.init()
@@ -59,6 +88,10 @@ fundo_rochas = pygame.transform.scale(fundo_rochas, tamanho)
 fundo_chao = pygame.transform.scale(fundo_chao, tamanho)
 fundo_lua = pygame.transform.scale(fundo_lua, tamanho)
 fundo_rochas_voadoras = pygame.transform.scale(fundo_rochas_voadoras, tamanho)
+fundo_rochas_voadoras_rect = fundo_rochas_voadoras.get_rect(topleft = (0, 0))
+
+index_estrelas = 0
+movimento_rochas = 1
 
 # Carrega as imagens do personagem
 jogador_index = 0
@@ -84,9 +117,15 @@ relogio = pygame.time.Clock()
 movimento_personagem = 0
 direcao_personagem = 0
 
+# Cria um evento para adicionar um objeto na tela
+novo_objeto_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(novo_objeto_timer, 500)
+
 # Loop principal do jogo
 while True:
+    # EVENTOS
     for evento in pygame.event.get():
+        print(evento)
         if evento.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -107,15 +146,19 @@ while True:
             if evento.key == pygame.K_LEFT:
                 movimento_personagem = 0
 
+        if evento.type == novo_objeto_timer:
+            adicionar_objeto()
+
     # Desenha o fundo na tela
     tela.blit(plano_fundo, (0, 0))
-    tela.blit(fundo_estrelas, (0, 0))
-    tela.blit(fundo_estrelas_2, (0, 0))
-    tela.blit(fundo_estrelas_3, (0, 0))
+    
+    animacao_estrelas()
+
     tela.blit(fundo_rochas, (0, 0))
     tela.blit(fundo_chao, (0, 0))
     tela.blit(fundo_lua, (0, 0))
-    tela.blit(fundo_rochas_voadoras, (0, 0))
+
+    animacao_rochas()
     
     # Faz a chamada da função animação do personagem
     animacao_personagem()
