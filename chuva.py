@@ -1,6 +1,6 @@
 import pygame
 from sys import exit
-from random import randint
+from random import randint, choice
 
 def animacao_rochas():
     global movimento_rochas
@@ -53,7 +53,43 @@ def animacao_personagem():
     tela.blit(jogador, jogador_retangulo)
 
 def adicionar_objeto():
-    print("Criar novo objeto")
+    global lista_chuva_objetos
+
+    objetos_lista_aleatoria = ['Coração'] * 10 + ['Moeda'] * 10 + ['Projetil'] * 80
+    tipo_objeto = choice(objetos_lista_aleatoria)
+
+    posicao = (randint(10, 950), randint(-100, 0))
+    velocidade = randint(5, 10)
+
+    if tipo_objeto == 'Projetil':
+        objeto_rect = projetil_superficies[0].get_rect(center=posicao)
+    elif tipo_objeto == 'Coração':
+        objeto_rect = coracao_superficies[0].get_rect(center=posicao)
+    elif tipo_objeto == 'Moeda':
+        objeto_rect = moeda_superficies[0].get_rect(center=posicao)
+
+    lista_chuva_objetos.append({
+        'tipo': tipo_objeto,
+        'retangulo': objeto_rect,
+        'velocidade': velocidade
+    })
+
+def movimento_objetos_chuva():
+    global lista_chuva_objetos
+
+    for objeto in lista_chuva_objetos:
+
+        objeto['retangulo'].y += objeto['velocidade']
+
+        if objeto['tipo'] == 'Projetil':
+            tela.blit(projetil_superficies[projetil_index], objeto['retangulo'])
+        elif objeto['tipo'] == 'Coração':
+            tela.blit(coracao_superficies[projetil_index], objeto['retangulo'])
+        elif objeto['tipo'] == 'Moeda':
+            tela.blit(moeda_superficies[projetil_index], objeto['retangulo'])
+
+        if objeto['retangulo'].y > 540:
+            lista_chuva_objetos.remove(objeto)
 
 # Inicializa o pygame
 pygame.init()
@@ -110,6 +146,32 @@ for imagem in range(1, 9):
 
 jogador_retangulo = jogador_parado_superficies[jogador_index].get_rect( center = (100, 430))
 
+# Carrega o coração
+coracao_superficies = []
+coracao_index = 0
+for imagem in range(1, 4):
+    img = pygame.image.load(f'assets/objetos/coracao/Heart{imagem}.png').convert_alpha()
+    img = pygame.transform.scale(img, (80, 80))
+    coracao_superficies.append(img)
+
+# Carrega a Moeda
+moeda_superficies = []
+moeda_index = 0
+for imagem in range(1, 5):
+    img = pygame.image.load(f'assets/objetos/moeda/Coin-A{imagem}.png').convert_alpha()
+    img = pygame.transform.scale(img, (80, 80))
+    moeda_superficies.append(img)
+
+# Carrega o Projetil
+projetil_superficies = []
+projetil_index = 0
+for imagem in range(1, 4):
+    img = pygame.image.load(f'assets/objetos/projetil/Hero Bullet{imagem}.png').convert_alpha()
+    projetil_superficies.append(img)
+
+# Guarda os objetos que vão cair do céu
+lista_chuva_objetos = []
+
 # Cria um relógio para controlar os FPS
 relogio = pygame.time.Clock()
 
@@ -125,7 +187,6 @@ pygame.time.set_timer(novo_objeto_timer, 500)
 while True:
     # EVENTOS
     for evento in pygame.event.get():
-        print(evento)
         if evento.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -162,6 +223,8 @@ while True:
     
     # Faz a chamada da função animação do personagem
     animacao_personagem()
+
+    movimento_objetos_chuva()
 
     # Atualiza a tela com o conteudo
     pygame.display.update()
