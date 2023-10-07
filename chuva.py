@@ -32,6 +32,12 @@ def animacao_personagem():
     global jogador_index
     # Calcula o movimento do personagem
     jogador_retangulo.x += movimento_personagem
+
+    if jogador_retangulo.right >= 960:
+        jogador_retangulo.right = 960
+    elif jogador_retangulo.left <= 0:
+        jogador_retangulo.left = 0
+
     # jogador_surface = null
 
     if movimento_personagem == 0: # Jogador está parado
@@ -91,6 +97,36 @@ def movimento_objetos_chuva():
         if objeto['retangulo'].y > 540:
             lista_chuva_objetos.remove(objeto)
 
+def colisoes_jogador():
+    global coracao, moeda
+
+    for objeto in lista_chuva_objetos:
+        if jogador_retangulo.colliderect(objeto['retangulo']):
+            if objeto['tipo'] == 'Coração':
+                coracao += 1
+            elif objeto['tipo'] == 'Moeda':
+                moeda += 1
+            elif objeto['tipo'] == 'Projetil':
+                coracao -= 1
+
+            # Remove o objeto da lista, logo da tela
+            lista_chuva_objetos.remove(objeto)
+
+def mostra_textos():
+    global moeda, coracao
+
+    texto_moedas = fonte_pixel.render(f"{moeda}", True, '#FFFFFF')
+    texto_coracoes = fonte_pixel.render(f"{coracao}", True, '#FFFFFF')
+
+    logo_moeda = pygame.transform.scale(moeda_superficies[0], (30, 30))
+    logo_coracao = pygame.transform.scale(coracao_superficies[0], (40, 40))
+
+    tela.blit(texto_coracoes, (12, 10))
+    tela.blit(texto_moedas, (12, 50))
+
+    tela.blit(logo_coracao, (60, 0))
+    tela.blit(logo_moeda, (65, 45))
+
 # Inicializa o pygame
 pygame.init()
 
@@ -104,6 +140,9 @@ pygame.display.set_caption("ChuvaMortal")
 ##
 ## Importa os arquivos necessários
 ##
+
+# Carrega a fonte do Jogo
+fonte_pixel = pygame.font.Font('assets/font/PixelType.ttf', 50)
 
 # Carrega o plano de fundo
 plano_fundo = pygame.image.load('assets/fundo/Night-Background8.png').convert()
@@ -183,8 +222,13 @@ direcao_personagem = 0
 novo_objeto_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(novo_objeto_timer, 500)
 
+jogo_ativo = True
+
+moeda = 0
+coracao = 3
+
 # Loop principal do jogo
-while True:
+while jogo_ativo:
     # EVENTOS
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
@@ -193,12 +237,15 @@ while True:
 
         if evento.type == pygame.KEYDOWN:
             if evento.key == pygame.K_RIGHT:
-                movimento_personagem = 5
+                movimento_personagem = 10
                 direcao_personagem = 1
 
             if evento.key == pygame.K_LEFT:
-                movimento_personagem = -5
+                movimento_personagem = -10
                 direcao_personagem = 0
+
+            if evento.key == pygame.K_ESCAPE:
+                jogo_ativo = False
 
         if evento.type == pygame.KEYUP:
             if evento.key == pygame.K_RIGHT:
@@ -225,6 +272,10 @@ while True:
     animacao_personagem()
 
     movimento_objetos_chuva()
+
+    colisoes_jogador()
+
+    mostra_textos()
 
     # Atualiza a tela com o conteudo
     pygame.display.update()
